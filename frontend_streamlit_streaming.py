@@ -16,12 +16,16 @@ user_message=st.chat_input()
 
 if user_message:
     st.session_state['message_history'].append({'role':'user','content':user_message})
-    with st.chat_message('human'):
+    with st.chat_message('user'):
         st.text(user_message)
 
 
-    response=workflow.invoke({'messages':[HumanMessage(content=user_message)]},config=config)
-    ai_message=response['messages'][-1].content
-    st.session_state['message_history'].append({'role':'assisstant','content':ai_message})
+    
     with st.chat_message('assistant'):
-        st.text(ai_message)
+        ai_message=st.write_stream(
+            message_content.content for message_content, metadata in workflow.stream({'messages':[HumanMessage(content=user_message)]},config=config,stream_mode='messages'))
+    st.session_state['message_history'].append({'role':'assistant','content':ai_message})
+        
+            
+
+        
