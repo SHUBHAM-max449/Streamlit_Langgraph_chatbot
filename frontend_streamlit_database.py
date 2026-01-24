@@ -1,5 +1,5 @@
 import streamlit as st
-from backend_langgraph_database import workflow, retrieve_all_threads
+from backend_langgraph_tools import workflow, retrieve_all_threads
 from langchain_core.messages import HumanMessage, AIMessage
 import uuid
 from backend_langgraph import model
@@ -99,9 +99,11 @@ if user_message:
         st.text(user_message)
 
     with st.chat_message('assistant'):
-        ai_message=st.write_stream(
-            message_content.content for message_content, metadata in 
-            workflow.stream({'messages':[HumanMessage(content=user_message)]},config=config,stream_mode='messages'))
+        def ai_only_stream():
+            for message_chunk,metadata in workflow.stream({'messages':[HumanMessage(content=user_message)]},config=config,stream_mode='messages'):
+                if isinstance(message_chunk,AIMessage):
+                    yield message_chunk.content
+        ai_message=st.write_stream(ai_only_stream())
     st.session_state['message_history'].append({'role':'assistant','content':ai_message})
         
             
