@@ -15,19 +15,14 @@ graph=StateGraph(ChatState)
 checkpointer=MemorySaver()
 
 def chat_node(state:ChatState):
-    prompt=f"""
-answer to the user query {state['messages']}
-"""
-    response=model.invoke(prompt).content
+    last_message= state['messages'][-1]
+    response=model.invoke(state['messages'])
     return {'messages':[response]}
 
 
-graph.add_node("Chot_node", chat_node)
+graph.add_node("Chat_node", chat_node)
 
-graph.add_edge(START,'Chot_node')
-graph.add_edge('Chot_node',END)
+graph.add_edge(START,'Chat_node')
+graph.add_edge('Chat_node',END)
 
 workflow=graph.compile(checkpointer=checkpointer)
-
-
-
